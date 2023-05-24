@@ -96,8 +96,11 @@ def text_color_disabled():
 
 _default_options = {
     'color': text_color,
+    'color_2': text_color,
     'color_disabled': text_color_disabled,
+    'color_disabled_2': text_color_disabled,
     'opacity': 1.0,
+    'opacity_2' : 0.4,
     'scale_factor': 1.0,
 }
 
@@ -113,6 +116,10 @@ def set_global_defaults(**kwargs):
         'color_active', 'color_selected', 'color_disabled',
         'color_on_selected', 'color_on_active', 'color_on_disabled',
         'color_off_selected', 'color_off_active', 'color_off_disabled',
+        'color_2', 'color_on_2', 'color_off_2',
+        'color_active_2', 'color_selected_2', 'color_disabled_2',
+        'color_on_selected_2', 'color_on_active_2', 'color_on_disabled_2',
+        'color_off_selected_2', 'color_off_active_2', 'color_off_disabled_2',
         'animation', 'offset', 'scale_factor', 'rotated', 'hflip', 'vflip',
         'draw'
         ]
@@ -138,27 +145,35 @@ class CharIconPainter:
         """Paint a single icon."""
         painter.save()
 
-        color_options = {
-            QIcon.On: {
-                QIcon.Normal: (options['color_on'], options['on']),
-                QIcon.Disabled: (options['color_on_disabled'],
-                                 options['on_disabled']),
-                QIcon.Active: (options['color_on_active'],
-                               options['on_active']),
-                QIcon.Selected: (options['color_on_selected'],
-                                 options['on_selected'])
-            },
+        def get_color_options(color_list):
+            return {
+                QIcon.On: {
+                    QIcon.Normal: (options[color_list[0]], options['on']),
+                    QIcon.Disabled: (options[color_list[1]],
+                                    options['on_disabled']),
+                    QIcon.Active: (options[color_list[2]],
+                                options['on_active']),
+                    QIcon.Selected: (options[color_list[3]],
+                                    options['on_selected'])
+                },
 
-            QIcon.Off: {
-                QIcon.Normal: (options['color_off'], options['off']),
-                QIcon.Disabled: (options['color_off_disabled'],
-                                 options['off_disabled']),
-                QIcon.Active: (options['color_off_active'],
-                               options['off_active']),
-                QIcon.Selected: (options['color_off_selected'],
-                                 options['off_selected'])
+                QIcon.Off: {
+                    QIcon.Normal: (options[color_list[4]], options['off']),
+                    QIcon.Disabled: (options[color_list[5]],
+                                    options['off_disabled']),
+                    QIcon.Active: (options[color_list[6]],
+                                options['off_active']),
+                    QIcon.Selected: (options[color_list[7]],
+                                    options['off_selected'])
+                }
             }
-        }
+
+        color_options = get_color_options([
+            'color_on', 'color_on_disabled', 
+            'color_on_active', 'color_on_selected',
+            'color_off', 'color_off_disabled', 
+            'color_off_active', 'color_off_selected'
+        ])
 
         color, char = color_options[state][mode]
         alpha = None
@@ -278,6 +293,32 @@ class CharIconPainter:
                 font.setHintingPreference(QFont.PreferNoHinting)
             painter.setFont(font)
             painter.drawText(rect, int(Qt.AlignCenter | Qt.AlignVCenter), char)
+
+        # Handles the second layer for FA Duotone Icons
+        if prefix == "fa6d":
+            color_options_2 = get_color_options([
+                'color_on_2', 'color_on_disabled_2', 
+                'color_on_active_2', 'color_on_selected_2',
+                'color_off_2', 'color_off_disabled_2', 
+                'color_off_active_2', 'color_off_selected_2'
+            ])
+
+            color, char = color_options_2[state][mode]
+            char_2 = char + char
+            alpha = None
+
+            # If color comes as a tuple, it means we need to set alpha on it.
+            if isinstance(color, tuple):
+                alpha = color[1]
+                color = color[0]
+
+            qcolor = QColor(color)
+            if alpha:
+                qcolor.setAlpha(alpha)
+
+            painter.setPen(qcolor)
+            painter.setOpacity(options.get('opacity_2', 0.4))
+            painter.drawText(rect, int(Qt.AlignCenter | Qt.AlignVCenter), char_2)
 
         painter.restore()
 
@@ -493,6 +534,20 @@ class IconicFont(QObject):
         options.setdefault('color_off_selected', options['color_selected'])
         options.setdefault('color_off_disabled', options['color_disabled'])
 
+        # Handles a secondary color for FA Duotone Icons
+        if prefix == 'fa6d':
+            color_2 = options.get('color_2')
+            options.setdefault('color_on_2', color_2)
+            options.setdefault('color_active_2', options['color_on_2'])
+            options.setdefault('color_selected_2', options['color_active_2'])
+            options.setdefault('color_on_active_2', options['color_active_2'])
+            options.setdefault('color_on_selected_2', options['color_selected_2'])
+            options.setdefault('color_on_disabled_2', options['color_disabled_2'])
+            options.setdefault('color_off_2', color_2)
+            options.setdefault('color_off_active_2', options['color_active_2'])
+            options.setdefault('color_off_selected_2', options['color_selected_2'])
+            options.setdefault('color_off_disabled_2', options['color_disabled_2'])
+
         return options
 
     def _get_prefix_chars(self, names):
@@ -622,42 +677,57 @@ class IconicFont(QObject):
                     continue
                 shutil.copy(src_path, user_fonts_dir)
 
-                # Further process the font file (`.ttf`)
-                if os.path.splitext(name)[-1] == '.ttf':
-                    # Load the font in the current session
-                    if not gdi32.AddFontResourceW(dst_path):
-                        os.remove(dst_path)
-                        raise WindowsError(
-                            f'AddFontResource failed to load "{src_path}"')
+                '''
+                Issue appears to be occurring with winreg, which throws off shutil.copy. 
+                If a certain ttf is not present within the LOCALAPPDATA, winreg will have 
+                svchost.exe start using the ttf file after it is copied to the LOCALAPPDATA. 
 
-                    # Store the fontname/filename in the registry
-                    filename = os.path.basename(dst_path)
-                    fontname = os.path.splitext(filename)[0]
+                shutil.copy will then throw a 'Permission denied' error if we ever try to
+                copy over a different version of a ttf (Free vs Pro, or Free 5.x vs Free 6.x). 
+                One workaround I found was to restart my laptop, for then svchost.exe 
+                would stop using the ttf file I wish to replace.  
 
-                    # Try to get the font's real name
-                    cb = wintypes.DWORD()
-                    if gdi32.GetFontResourceInfoW(
-                            filename, ctypes.byref(cb), None, GFRI_DESCRIPTION):
-                        buf = (ctypes.c_wchar * cb.value)()
-                        if gdi32.GetFontResourceInfoW(
-                                filename, ctypes.byref(cb), buf, GFRI_DESCRIPTION):
-                            fontname = buf.value
-                    is_truetype = wintypes.BOOL()
-                    cb.value = ctypes.sizeof(is_truetype)
-                    gdi32.GetFontResourceInfoW(
-                        filename, ctypes.byref(cb), ctypes.byref(is_truetype),
-                        GFRI_ISTRUETYPE)
-                    if is_truetype:
-                        fontname += ' (TrueType)'
-                    try:
-                        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, FONTS_REG_PATH, 0,
-                                            winreg.KEY_SET_VALUE) as key:
-                            winreg.SetValueEx(key, fontname, 0, winreg.REG_SZ, filename)
-                    except OSError:
-                        # Needed to support older Windows version where
-                        # font installation per user is not possible/related registry
-                        # entry is not available
-                        # See spyder-ide/qtawesome#214 
-                        return fonts_directory
+                This issue is really only prominent if you start using QTAwesome with one version 
+                of a ttf, and then you wish to update to a different version, all while 
+                your computer is on in one session. 
+                Before you use QTAwesome after an update, you'll have to restart your computer.
+                '''
+                # # Further process the font file (`.ttf`)
+                # if os.path.splitext(name)[-1] == '.ttf':
+                #     # Load the font in the current session
+                #     if not gdi32.AddFontResourceW(dst_path):
+                #         os.remove(dst_path)
+                #         raise WindowsError(
+                #             f'AddFontResource failed to load "{src_path}"')
+
+                #     # Store the fontname/filename in the registry
+                #     filename = os.path.basename(dst_path)
+                #     fontname = os.path.splitext(filename)[0]
+
+                #     # Try to get the font's real name
+                #     cb = wintypes.DWORD()
+                #     if gdi32.GetFontResourceInfoW(
+                #             filename, ctypes.byref(cb), None, GFRI_DESCRIPTION):
+                #         buf = (ctypes.c_wchar * cb.value)()
+                #         if gdi32.GetFontResourceInfoW(
+                #                 filename, ctypes.byref(cb), buf, GFRI_DESCRIPTION):
+                #             fontname = buf.value
+                #     is_truetype = wintypes.BOOL()
+                #     cb.value = ctypes.sizeof(is_truetype)
+                #     gdi32.GetFontResourceInfoW(
+                #         filename, ctypes.byref(cb), ctypes.byref(is_truetype),
+                #         GFRI_ISTRUETYPE)
+                #     if is_truetype:
+                #         fontname += ' (TrueType)'
+                #     try:
+                #         with winreg.OpenKey(winreg.HKEY_CURRENT_USER, FONTS_REG_PATH, 0,
+                #                             winreg.KEY_SET_VALUE) as key:
+                #             winreg.SetValueEx(key, fontname, 0, winreg.REG_SZ, filename)
+                #     except OSError:
+                #         # Needed to support older Windows version where
+                #         # font installation per user is not possible/related registry
+                #         # entry is not available
+                #         # See spyder-ide/qtawesome#214 
+                #         return fonts_directory
 
         return user_fonts_dir

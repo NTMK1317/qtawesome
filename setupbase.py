@@ -52,7 +52,7 @@ def rename_font(font_path, font_name):
     # ID 3: 'Font Awesome 5 Free Regular-5.14.0'
     # ID 4: 'Font Awesome 5 Free Regular'
     # ID 5: '331.264 (Font Awesome version: 5.14.0)'
-    # ID 6: 'FontAwesome5Free-Regular'
+    # ID 6: 'fontawesome6Free-Regular'
     # ID 10: "The web's most popular icon set and toolkit."
     # ID 11: 'https://fontawesome.com'
     # ID 16: 'Font Awesome 5 Free'
@@ -75,9 +75,9 @@ def rename_font(font_path, font_name):
             f"ERROR: unable to write new name to OpenType tables for: {font_path}")
 
 
-class UpdateFA5Command(setuptools.Command):
-    """A custom command to make updating FontAwesome 5.x easy!"""
-    description = 'Try to update the FontAwesome 5.x data in the project.'
+class UpdateFA6Command(setuptools.Command):
+    """A custom command to make updating FontAwesome 6.x easy!"""
+    description = 'Try to update the FontAwesome 6.x data in the project.'
     user_options = [
         ('fa-version=', None, 'FA version.'),
         ('zip-path=', None, 'Read from local zip file path.'),
@@ -85,10 +85,20 @@ class UpdateFA5Command(setuptools.Command):
 
     # Update these below if the FontAwesome changes their structure:
     FA_STYLES = ('regular', 'solid', 'brands')
-    CHARMAP_PATH_TEMPLATE = os.path.join(HERE, 'qtawesome', 'fonts', 'fontawesome5-{style}-webfont-charmap.json')
-    TTF_PATH_TEMPLATE = os.path.join(HERE, 'qtawesome', 'fonts', 'fontawesome5-{style}-webfont.ttf')
+    PRO_FA_STYLES = ('regular', 'solid', 'brands', 'duotone', 'light', 'thin')
+    CHARMAP_PATH_TEMPLATE = os.path.join(HERE, 'qtawesome', 'fonts', 'fontawesome6-{style}-webfont-charmap.json')
+    TTF_PATH_TEMPLATE = os.path.join(HERE, 'qtawesome', 'fonts', 'fontawesome6-{style}-webfont.ttf')
     URL_TEMPLATE = 'https://github.com/FortAwesome/Font-Awesome/' \
         'releases/download/{version}/fontawesome-free-{version}-web.zip'
+    PRO_BUNDLED_FONTS = r"('fa6d'," + '\n\t\t' + \
+                        r"'fontawesome6-duotone-webfont.ttf'," + '\n\t\t' + \
+                        r"'fontawesome6-duotone-webfont-charmap.json')," + '\n\t' + \
+                        r"('fa6l'," + '\n\t\t' + \
+                        r"'fontawesome6-light-webfont.ttf'," + '\n\t\t' + \
+                        r"'fontawesome6-light-webfont-charmap.json')," + '\n\t' + \
+                        r"('fa6t'," + '\n\t\t' + \
+                        r"'fontawesome6-thin-webfont.ttf'," + '\n\t\t' + \
+                        r"'fontawesome6-thin-webfont-charmap.json')," + '\n\t'
 
     def initialize_options(self):
         """Set default values for the command options."""
@@ -101,6 +111,11 @@ class UpdateFA5Command(setuptools.Command):
         if self.zip_path:
             assert os.path.exists(self.zip_path), (
                 'Local zipfile does not exist: %s' % self.zip_path)
+            if 'fontawesome-pro-6' in self.zip_path:
+                self.pro = True
+                self.FA_STYLES = self.PRO_FA_STYLES
+            else:
+                self.pro = False
 
     def __print(self, msg):
         """Shortcut for printing with the setuptools logger."""
@@ -193,7 +208,7 @@ class UpdateFA5Command(setuptools.Command):
 
             # Fix to prevent repeated font names:
             if style in ('regular', 'solid'):
-                new_name = str("Font Awesome 5 Free %s") % style.title()
+                new_name = str("Font Awesome 6 Free/Pro %s") % style.title()
                 self.__print('Renaming font to "%s" in: %s' % (new_name, font_path))
                 if ttLib is not None:
                     rename_font(font_path, new_name)
@@ -215,10 +230,17 @@ class UpdateFA5Command(setuptools.Command):
         self.__print('Patching new MD5 hashes in: %s' % init_path)
         with open(init_path, 'r') as init_file:
             contents = init_file.read()
+        # If Pro, and Pro fonts are not present, add them to the _BUNDLED_FONTS:
+        if self.pro and self.PRO_BUNDLED_FONTS not in contents:
+            index = contents.find(r"('ei',")
+            contents = contents[:index] + self.PRO_BUNDLED_FONTS + contents[index:]
+        # If not Pro, and Pro fonts are present, remove them from the _BUNDLED_FONTS:
+        elif not self.pro and self.PRO_BUNDLED_FONTS in contents:
+            contents = contents.replace(self.PRO_BUNDLED_FONTS, '')
         # We read it in full, then use regex substitution:
         for style, md5 in hashes.items():
             self.__print('New "%s" hash is: %s' % (style, md5))
-            regex = r"('fontawesome5-%s-webfont.ttf':\s+)'(\w+)'" % style
+            regex = r"('fontawesome6-%s-webfont.ttf':\s+)'(\w+)'" % style
             subst = r"\g<1>'" + md5 + "'"
             contents = re.sub(regex, subst, contents, 1)
         # and finally overwrite with the modified file:

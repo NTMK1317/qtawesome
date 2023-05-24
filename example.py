@@ -4,7 +4,7 @@
 import sys
 
 # Third party imports
-from qtpy import QtCore, QtWidgets
+from qtpy import QtCore, QtWidgets, QtGui
 
 # Local imports
 import qtawesome as qta
@@ -19,15 +19,16 @@ class AwesomeExample(QtWidgets.QDialog):
         supported_fonts_label = QtWidgets.QLabel('Supported fonts (prefix)')
         supported_fonts_label.setAlignment(QtCore.Qt.AlignCenter)
 
-        # Get FontAwesome 5.x icons by name in various styles by name
-        fa5_icon = qta.icon('fa5.flag')
-        fa5_button = QtWidgets.QPushButton(fa5_icon, 'Font Awesome regular (fa5)')
+        # Get FontAwesome 6.x icons by name in various styles by name
+        fa6_icon = qta.icon('fa6.flag')
+        fa6_button = QtWidgets.QPushButton(fa6_icon, 'Font Awesome regular (fa6)')
 
-        fa5s_icon = qta.icon('fa5s.flag')
-        fa5s_button = QtWidgets.QPushButton(fa5s_icon, 'Font Awesome solid (fa5s)')
+        fa6s_icon = qta.icon('fa6s.flag')
+        fa6s_button = QtWidgets.QPushButton(fa6s_icon, 'Font Awesome solid (fa6s)')
 
-        fa5b_icon = qta.icon('fa5b.github')
-        fa5b_button = QtWidgets.QPushButton(fa5b_icon, 'Font Awesome brands (fa5b)')
+        fa6b_icon = qta.icon('fa6b.github')
+        # fa6b_icon = qta.icon('fa6d.envelope', color='red',color_2='blue', color_active='orange', color_active_2='green')
+        fa6b_button = QtWidgets.QPushButton(fa6b_icon, 'Font Awesome brands (fa6b)')
 
         # Get Elusive icons by name
         asl_icon = qta.icon('ei.asl')
@@ -66,8 +67,8 @@ class AwesomeExample(QtWidgets.QDialog):
         vflip_button = QtWidgets.QPushButton(vflip_icon, 'Vertically Flipped Icons')
 
         # Styling
-        styling_icon = qta.icon('fa5s.music',
-                                active='fa5s.balance-scale',
+        styling_icon = qta.icon('fa6s.music',
+                                active='fa6s.scale-balanced',
                                 color='blue',
                                 color_active='orange')
         music_button = QtWidgets.QPushButton(styling_icon, 'Changing colors')
@@ -78,7 +79,7 @@ class AwesomeExample(QtWidgets.QDialog):
         heart_button = QtWidgets.QPushButton(icon_with_alpha, 'Setting alpha')
 
         # Toggle
-        toggle_icon = qta.icon('fa5s.home', selected='fa5s.balance-scale',
+        toggle_icon = qta.icon('fa6s.house', selected='fa6s.scale-balanced',
                                color_off='black',
                                color_off_active='blue',
                                color_on='orange',
@@ -105,15 +106,15 @@ class AwesomeExample(QtWidgets.QDialog):
                                                    'Icon drawn as an image')
 
         # Stack icons
-        camera_ban = qta.icon('fa5s.camera', 'fa5s.ban',
+        camera_ban = qta.icon('fa6s.camera', 'fa6s.ban',
                               options=[{'scale_factor': 0.5,
-                                        'active': 'fa5s.balance-scale'},
+                                        'active': 'fa6s.scale-balanced'},
                                        {'color': 'red', 'opacity': 0.7}])
         stack_button = QtWidgets.QPushButton(camera_ban, 'Stack')
         stack_button.setIconSize(QtCore.QSize(32, 32))
 
         # Stack and offset icons
-        saveall = qta.icon('fa5.save', 'fa5.save',
+        saveall = qta.icon('fa6.floppy-disk', 'fa6.floppy-disk',
                            options=[{'scale_factor': 0.8,
                                      'offset': (0.2, 0.2),
                                      'color': 'gray'},
@@ -122,13 +123,13 @@ class AwesomeExample(QtWidgets.QDialog):
 
         # Spin icons
         spin_button = QtWidgets.QPushButton(' Spinning icon')
-        spin_icon = qta.icon('fa5s.spinner', color='red',
+        spin_icon = qta.icon('fa6s.spinner', color='red',
                              animation=qta.Spin(spin_button))
         spin_button.setIcon(spin_icon)
 
         # Pulse icons
         pulse_button = QtWidgets.QPushButton(' Pulsing icon')
-        pulse_icon = qta.icon('fa5s.spinner', color='green',
+        pulse_icon = qta.icon('fa6s.spinner', color='green',
                               animation=qta.Pulse(pulse_button))
         pulse_button.setIcon(pulse_icon)
 
@@ -137,7 +138,7 @@ class AwesomeExample(QtWidgets.QDialog):
         options = [{'scale_factor': 0.4,
                     'animation': qta.Spin(stack_spin_button)},
                    {'color': 'blue'}]
-        stack_spin_icon = qta.icon('ei.asl', 'fa5.square',
+        stack_spin_icon = qta.icon('ei.asl', 'fa6.square',
                                    options=options)
         stack_spin_button.setIcon(stack_spin_icon)
         stack_spin_button.setIconSize(QtCore.QSize(32, 32))
@@ -150,9 +151,9 @@ class AwesomeExample(QtWidgets.QDialog):
         grid = QtWidgets.QGridLayout()
         fonts_widgets = [
             supported_fonts_label,
-            fa5_button,
-            fa5s_button,
-            fa5b_button,
+            fa6_button,
+            fa6s_button,
+            fa6b_button,
             elusive_button,
             mdi6_button,
             ph_button,

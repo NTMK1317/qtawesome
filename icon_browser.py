@@ -27,7 +27,6 @@ class IconBrowser(QtWidgets.QMainWindow):
 
         qta._instance()
         fontMaps = qta._resource['iconic'].charmap
-        print(qta.__path__)
 
         iconNames = []
         for fontCollection, fontData in fontMaps.items():

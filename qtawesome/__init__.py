@@ -36,16 +36,25 @@ _BUNDLED_FONTS = (
     ('fa',
         'fontawesome4.7-webfont.ttf',
         'fontawesome4.7-webfont-charmap.json'),
-    ('fa5',
-        'fontawesome5-regular-webfont.ttf',
-        'fontawesome5-regular-webfont-charmap.json'),
-    ('fa5s',
-        'fontawesome5-solid-webfont.ttf',
-        'fontawesome5-solid-webfont-charmap.json'),
-    ('fa5b',
-        'fontawesome5-brands-webfont.ttf',
-        'fontawesome5-brands-webfont-charmap.json'),
-    ('ei',
+    ('fa6',
+        'fontawesome6-regular-webfont.ttf',
+        'fontawesome6-regular-webfont-charmap.json'),
+    ('fa6s',
+        'fontawesome6-solid-webfont.ttf',
+        'fontawesome6-solid-webfont-charmap.json'),
+    ('fa6b',
+        'fontawesome6-brands-webfont.ttf',
+        'fontawesome6-brands-webfont-charmap.json'),
+	('fa6d',
+		'fontawesome6-duotone-webfont.ttf',
+		'fontawesome6-duotone-webfont-charmap.json'),
+	('fa6l',
+		'fontawesome6-light-webfont.ttf',
+		'fontawesome6-light-webfont-charmap.json'),
+	('fa6t',
+		'fontawesome6-thin-webfont.ttf',
+		'fontawesome6-thin-webfont-charmap.json'),
+	('ei',
         'elusiveicons-webfont.ttf',
         'elusiveicons-webfont-charmap.json'),
     ('mdi',
@@ -69,9 +78,12 @@ _BUNDLED_FONTS = (
 # MD5 Hashes for font files bundled with qtawesome:
 _MD5_HASHES = {
     'fontawesome4.7-webfont.ttf': 'b06871f281fee6b241d60582ae9369b9',
-    'fontawesome5-regular-webfont.ttf': 'dc47e4089f5bcb25f241bdeb2de0fb58',
-    'fontawesome5-solid-webfont.ttf': '5de19800fc9ae73438c2e5c61d041b48',
-    'fontawesome5-brands-webfont.ttf': '513aa607d398efaccc559916c3431403',
+    'fontawesome6-regular-webfont.ttf': 'b462b59da877785cf32bd31a3727cb63',
+    'fontawesome6-solid-webfont.ttf': '50d65a5170521d996ad49e09c9335a77',
+    'fontawesome6-brands-webfont.ttf': '0b45080596248c38ea184dfa9ca78e27',
+    'fontawesome6-duotone-webfont.ttf': '98d4775506803d3c7a4fef6b07d085ed',
+    'fontawesome6-light-webfont.ttf': 'c6d18d36f02b5f3c7996704c45ce1757',
+    'fontawesome6-thin-webfont.ttf': '385c4ccc6a9b96d134326c06f1717f6d',
     'elusiveicons-webfont.ttf': '207966b04c032d5b873fd595a211582e',
     'materialdesignicons5-webfont.ttf': 'b7d40e7ef80c1d4af6d94902af66e524',
     'materialdesignicons6-webfont.ttf': '9a2f455e7cbce011368aee95d292613b',
@@ -152,9 +164,9 @@ def icon(*names, **kwargs):
     name of the icon.
 
      - The prefix corresponding to Font-Awesome 4.x is 'fa'
-     - The prefix corresponding to Font-Awesome 5.x (regular) is 'fa5'
-     - The prefix corresponding to Font-Awesome 5.x (solid) is 'fa5s'
-     - The prefix corresponding to Font-Awesome 5.x (brands) is 'fa5b'
+     - The prefix corresponding to Font-Awesome 5.x (regular) is 'fa6'
+     - The prefix corresponding to Font-Awesome 5.x (solid) is 'fa6s'
+     - The prefix corresponding to Font-Awesome 5.x (brands) is 'fa6b'
      - The prefix corresponding to Elusive-Icons is 'ei'
      - The prefix corresponding to Material-Design-Icons 5.x is 'mdi'
      - The prefix corresponding to Material-Design-Icons 6.x is 'mdi6'
@@ -168,16 +180,16 @@ def icon(*names, **kwargs):
         import qtawesome as qta
 
         music_icon = qta.icon(
-            'fa5s.music',
+            'fa6s.music',
             color='blue',
             color_active='orange')
 
     When requesting multiple glyphs, the `options` keyword argument contains
     the list of option dictionaries to be used for each glyph::
 
-        camera_ban = qta.icon('fa5s.camera', 'fa5s.ban', options=[{
+        camera_ban = qta.icon('fa6s.camera', 'fa6s.ban', options=[{
                 'scale_factor': 0.5,
-                'active': 'fa5s.balance-scale'
+                'active': 'fa6s.balance-scale'
             }, {
                 'color': 'red',
                 'opacity': 0.7
@@ -336,7 +348,7 @@ class IconWidget(QtWidgets.QLabel):
 
     if supports the same arguments as icon()
     for example
-    music_icon = qta.IconWidget('fa5s.music',
+    music_icon = qta.IconWidget('fa6s.music',
                                 color='blue',
                                 color_active='orange')
 
